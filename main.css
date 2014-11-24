@@ -7,7 +7,7 @@ body {
 	font-family: Arial, Helvetica, sans-serif;
 }
 h1 {
-	color: black;
+	color: #294860;
 }
 div.die-fresh{
 	background: #1199c3;
@@ -44,7 +44,7 @@ div.dice-container{
 
 button {
 	width: 200px;
-	height: 100px;
+	height: 80px;
 }
 .btn {
 	display: inline-block;
