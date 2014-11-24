@@ -1,10 +1,7 @@
-
 var model, view, octopus, update;
 var gameOn;
 $('document').ready(function(){
-
 	gameOn = true;
-
 	model = {
 		dice : [],
 		getDie : function(i){
@@ -36,13 +33,8 @@ $('document').ready(function(){
 					state: 'fresh'
 				});
 			}
-		},
-		update : function(){
 		}
 	}
-
-
-
 	view = {
 		diceContainer : $('div.dice-container'),
 		dice : function(){
@@ -68,7 +60,7 @@ $('document').ready(function(){
 				$('#die-'+die.id).attr('class', 'die die-'+die.state);
 				$('#die-'+die.id).text(die.val);
 			}
-		},
+		}
 	}
 	octopus = {
 		getDie : function(index) {
@@ -100,8 +92,18 @@ $('document').ready(function(){
 					}
 					if (die.state == 'fresh')
 						die.val = Math.floor(Math.random() * 6) + 1;
-				}
+				};
+				var dice = [];
+				for (var i=0; i<model.dice.length; i++){
+					die = model.dice[i];
+					if (die.state == 'fresh'){
+						dice.push(die);
+					}
+				};
 				view.render();
+				if (logic.handDoesBust(dice)){
+					alert('Busted!');
+				}
 			});
 			$('#clear').click(function(){
 				var die;
@@ -114,7 +116,6 @@ $('document').ready(function(){
 				view.render();
 			})
 		}
-
 	}
 	update = function(){
 		model.update();
