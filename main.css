@@ -3,11 +3,15 @@ body {
 	max-width: 800px;
 	text-align: center;
 	font-weight: bold;
-	color: white;
+	color: black;
 	font-family: Arial, Helvetica, sans-serif;
 }
 h1 {
 	color: #294860;
+}
+div.score-container {
+	display: inline-block;
+	padding: 0 10px;
 }
 div.die-fresh{
 	background: #1199c3;
@@ -26,6 +30,7 @@ div.die-locked{
 div.die {
 	display:inline-block;
 	width: 95px;
+	color: white;
 	height: 95px;
 	line-height: 95px;
 
@@ -36,6 +41,7 @@ div.die {
 
 div.dice-container{
 	margin: 10px 0;
+	display:inline-block;
 }
 /*#buttons {
 	height: 100px;
@@ -90,3 +96,15 @@ button {
 	background-color: #f6a926;
 	border-color: #ca7342;
 }
+.btn.disabled, .btn[disabled], fieldset[disabled] .btn {
+	cursor: not-allowed;
+	pointer-events: none;
+	opacity: .65;
+	filter: alpha(opacity=65);
+	-webkit-box-shadow: none;
+	box-shadow: none;
+}
+
+/*button:disabled {
+	background-color: #666666;
+}*/

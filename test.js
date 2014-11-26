@@ -1,4 +1,13 @@
 test = {
+	setDiceTo: function(diceVals){
+		var die;
+		for (var i=0; i<diceVals.length; i++){
+			die = model.dice[i];
+			console.log(die);
+			die.val = diceVals[i];
+		};
+		view.render();
+	},
 	makeDice : function(diceList, state) {
 		dice = []
 		var die;
