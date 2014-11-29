@@ -1,13 +1,49 @@
-var model, view, octopus, update;
-var gameOn;
+var model, view, octopus, update, turn;
 $('document').ready(function(){
-	gameOn = true;
+	turn = {
+		state: 'new',
+		states: ['new', 'rolling', 'just-rolled', 'busted', 'selecting', 'scoring', 'refreshed'],
+		playerIndex: 0,
+		nextPlayerIndex: function() {
+			return (turn.playerIndex + 1) % model.numPlayers;
+		}
+	};
 	model = {
 		playerScore : 0,
+		numPlayers: 1,
 		turnScore : 0,
 		rollScore : 0,
-		canRoll: true,
-		canEndTurn: false,
+		canRoll : function() {
+			var state = turn.state;
+			var falseStates = ['busted', 'just-rolled', 'just-rolled-first', 'selected-bad']
+			if (falseStates.indexOf(state) > -1){
+				return false;
+			};
+			var trueStates = ['new', 'refreshed', 'selected-good'];
+			if (trueStates.indexOf(state) > -1) {
+				return true;
+			}
+			console.log(turn.state);
+			return true;
+		},
+		canEndTurn: function(){
+			var state = turn.state;
+			var falseStates = ['busted', 'new', 'just-rolled-first', 'selected-bad'];
+			if (falseStates.indexOf(state) > -1){
+				return false;
+			};
+			var trueStates = ['refreshed', 'selected-good', 'just-rolled'];
+			if (trueStates.indexOf(state) > -1) {
+				return true;
+			}
+			if (model.turnScore > 0) {
+				return true;
+			} else {
+				return false;
+			}
+			console.log(state);
+			return true;
+		},
 		dice : [],
 		setDie : function(newDie){
 			this.val = newDie.val;
@@ -46,9 +82,10 @@ $('document').ready(function(){
 		},
 		allDiceUsed : function(){
 			var die;
+			var usedDice = []
 			for (var i=0; i<model.dice.length; i++){
 				die = model.dice[i];
-				if (die.state != 'locked'){
+				if (die.state != 'locked' && die.state != 'selected'){
 					return false;
 				}
 			};
@@ -117,8 +154,8 @@ $('document').ready(function(){
 		},
 		getActions : function() {
 			return {
-				'canRoll' : model.canRoll,
-				'canEndTurn': model.canEndTurn
+				'canRoll' : model.canRoll(),
+				'canEndTurn': model.canEndTurn()
 			}
 		},
 		getDie : function(index) {
@@ -141,13 +178,13 @@ $('document').ready(function(){
 				$(this).addClass('die-'+die.state);
 				$(this).text(die.val);
 				selected = model.getDiceOfState('selected');
-				if (logic.scoreDice(selected)['score'] > 0) {
-					model.canEndTurn = true;
-					model.canRoll = true;
-				} else {
-					model.canEndTurn = false;
-					model.canRoll = false;
-				}
+				if (!selected || selected.length == 0) {
+					turn.state = 'selected-bad';
+				} else if (logic.scoreDice(selected)){//['score'] > 0) {
+					turn.state = 'selected-good';
+				} else { //if(selected.length) {
+					turn.state = 'selected-bad';
+				};
 				view.render();
 			});
 			$('#roll').click(function(){
@@ -164,40 +201,52 @@ $('document').ready(function(){
 						fresh.push(die);
 					}
 				};
-				if (selected.length == 0 && fresh.length < 6) {
-					alert('select some dice before you roll!');
-					return;
-				};
+				// if (selected.length == 0 && fresh.length < 6) {
+				// 	alert('select some dice before you roll!');
+				// 	return;
+				// };
 				if (selected.length){
 					combinationsAndScore = logic.scoreDice(selected);
 					combinations = combinationsAndScore['combinations'];
 					score = combinationsAndScore['score'];
-					console.log(score);
 					model.turnScore += score;
 				};
-				for (var i=0; i<model.dice.length; i++){
-					die = model.dice[i];
-					if (die.state == 'selected'){
-						die.state = 'locked';
-					}
-					if (die.state == 'fresh')
-						die.val = Math.floor(Math.random() * 6) + 1;
-				};
+				function rollDiceToState(state) {
+					var die;
+					for (var i=0; i<model.dice.length; i++){
+						die = model.dice[i];
+						if (die.state == 'selected'){
+							die.state = 'locked';
+						}
+						if (die.state == 'fresh'){
+							die.val = Math.floor(Math.random() * 6) + 1;
+						}
+						turn.state = state;
+					};
+				}
+				rollDiceToState('just-rolled');
 				var dice = [];
 				for (var i=0; i<model.dice.length; i++){
 					die = model.dice[i];
 					if (die.state == 'fresh'){
 						dice.push(die);
 					}
+					if (dice.length == 6) {
+						turn.state = 'just-rolled-first';
+					}
 				};
 				view.render();
 				if (logic.handDoesBust(dice)){
 					alert('Busted!');
 					model.turnScore = 0;
+					turn.state = 'busting';
 					model.refreshDice();
+					turn.state = 'new'
 				}
 				if (model.allDiceUsed()){
 					model.refreshDice();
+					turn.state = 'refreshed';
+					rollDiceToState('refreshed');
 				}
 				view.render();
 			});
