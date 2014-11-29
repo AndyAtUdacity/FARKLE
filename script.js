@@ -69,17 +69,21 @@ $('document').ready(function(){
 			}
 			view.render();
 		},
-		render : function(){
-			var die, actions;
-			var scores = octopus.getScores();
+		renderDice : function(){
+			var die;
 			for (var i=0; i<octopus.getAllDice().length; i++){
 				die = octopus.getDie(i);
 				$('#die-'+die.id).attr('class', 'die die-'+die.state);
 				$('#die-'+die.id).text(die.val);
 			}
+		},
+		renderScores : function(){
+			var scores = octopus.getScores();
 			$('#turn-score').text(scores['turnScore']);
-			$('#total-score').text(scores['playerScore'])
-			actions = octopus.getActions();
+			$('#total-score').text(scores['playerScore']);
+		},
+		renderButtons : function(){
+			var actions = octopus.getActions();
 			if (actions['canRoll']){
 				$('#roll').removeClass('disabled');
 				$("#roll").prop("disabled",false);
@@ -94,6 +98,12 @@ $('document').ready(function(){
 				$('#end-turn').addClass('disabled');
 				$("#end-turn").prop("disabled",true);
 			}
+		},
+		render : function(){
+			var actions;
+			view.renderDice();
+			view.renderScores();
+			view.renderButtons();
 		}
 	}
 	octopus = {
@@ -131,7 +141,7 @@ $('document').ready(function(){
 				$(this).addClass('die-'+die.state);
 				$(this).text(die.val);
 				selected = model.getDiceOfState('selected');
-				if (logic.scoreDice(selected)['score']) {
+				if (logic.scoreDice(selected)['score'] > 0) {
 					model.canEndTurn = true;
 					model.canRoll = true;
 				} else {
@@ -188,16 +198,6 @@ $('document').ready(function(){
 				}
 				if (model.allDiceUsed()){
 					model.refreshDice();
-				}
-				view.render();
-			});
-			$('#clear').click(function(){
-				var die;
-				for (var i=0; i<model.dice.length; i++){
-					die = model.dice[i];
-					if (die.state == 'selected'){
-						die.state = 'fresh';
-					}
 				}
 				view.render();
 			});
